@@ -1,6 +1,7 @@
 package uci
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -22,6 +23,8 @@ type Tree interface {
 	// (and their sections) via Get, Set, Add, Delete, DeleteAll will
 	// load missing files automatically.
 	LoadConfig(name string, forceReload bool) error
+
+	LoadConfigString(name, body string) error
 
 	// Commit writes all changes back to the system.
 	//
@@ -118,6 +121,21 @@ func (t *tree) loadConfig(name string) error {
 		t.configs = make(map[string]*config)
 	}
 	t.configs[name] = cfg
+	return nil
+}
+
+func (t *tree) LoadConfigString(name, body string) error {
+	cfg, err := parse(name, string(body))
+	if err != nil {
+		return err
+	}
+
+	if t.configs == nil {
+		t.configs = make(map[string]*config)
+	}
+	t.configs[name] = cfg
+
+	fmt.Printf("config: %#v\n", cfg)
 	return nil
 }
 
